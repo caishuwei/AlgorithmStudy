@@ -4,5 +4,10 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
 
-sourceCompatibility = "7"
-targetCompatibility = "7"
+sourceCompatibility = "8"
+targetCompatibility = "8"
+
+//设置运行窗口编码类型为UTF-8
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
