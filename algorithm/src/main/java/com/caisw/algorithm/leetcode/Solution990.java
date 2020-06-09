@@ -81,8 +81,71 @@ public class Solution990 {
             }
         }
 
+        //空间 O(N*(N+1))
+        //时间 O(N*(1~26))
         return true;
     }
+
+    public boolean equationsPossible2(String[] equations) {
+        //并查集
+        //https://zhuanlan.zhihu.com/p/93647900
+        //合并和查找功能，散开的元素根据规则进行分组，分组之间的元素发生关联，合并两个分组
+        //加入分组的时候只需要指向分组中任意一个元素即可，合并分组则把分组的根元素指向另一个分组
+        //路径优化，每次加入分组时，将元素指向根分组，查询后更新父元素为根元素优化下次查询速度
+
+        int[] parent = new int[26];
+        int aIndex = 'a';
+        for (int i = 0; i < parent.length; i++) {
+            parent[i] = i;
+        }
+        int indexV1, indexV2;
+
+        //先将关联元素进行分组
+        for (int i = 0; i < equations.length; i++) {
+            if (equations[i].charAt(1) == '=') {
+                indexV1 = equations[i].charAt(0) - aIndex;
+                indexV2 = equations[i].charAt(3) - aIndex;
+                union(parent, indexV1, indexV2);
+            }
+        }
+
+        for (int i = 0; i < equations.length; i++) {
+            if (equations[i].charAt(1) == '!') {
+                indexV1 = equations[i].charAt(0) - aIndex;
+                indexV2 = equations[i].charAt(3) - aIndex;
+                if (find(parent, indexV1) == find(parent, indexV2)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 合并两个变量到一个分组中
+     */
+    private void union(int[] parent, int v1, int v2) {
+        //将v2所在分组的根元素指向v1所在分组的根元素
+        parent[find(parent, v2)] = find(parent, v1);
+    }
+
+    /**
+     * 查找变量根元素
+     * <div>
+     *     <img src="../../../../../res/leetcode/990/yujinxiang.png"  alt="上海鲜花港 - 郁金香" />
+     * </div>
+     */
+    private int find(int[] parent, int v1) {
+        //根元素的特点是parent[root] = root
+        int index = v1;
+        while (parent[index] != index) {
+            //优化查询，将指针指向根元素，下次查询速度更快，使用递归的话，性能要慢不少
+            parent[index] = parent[parent[index]];
+            index = parent[index];
+        }
+        return index;
+    }
+
 
     public static void main(String[] args) {
 //        System.out.println(new Solution990().equationsPossible(new String[]{"a==b", "b!=a"}));
@@ -90,7 +153,8 @@ public class Solution990 {
 //        System.out.println(new Solution990().equationsPossible(new String[]{"a==b", "b==c", "a==c"}));
 //        System.out.println(new Solution990().equationsPossible(new String[]{"a==b", "b!=c", "c==a"}));
 //        System.out.println(new Solution990().equationsPossible(new String[]{"c==c", "b==d", "x!=z"}));
-        System.out.println(new Solution990().equationsPossible(new String[]{"f==f","a!=a","d==b","a==f","f!=a"}));
+        System.out.println(new Solution990().equationsPossible(new String[]{"f==f", "a!=a", "d==b", "a==f", "f!=a"}));
+        System.out.println(new Solution990().equationsPossible2(new String[]{"f==f", "a!=a", "d==b", "a==f", "f!=a"}));
     }
 
 }
