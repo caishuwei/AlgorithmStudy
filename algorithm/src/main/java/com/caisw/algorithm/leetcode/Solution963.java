@@ -17,7 +17,58 @@ import java.util.Set;
 public class Solution963 {
 
     public double minAreaFreeRect(int[][] points) {
-        //评论里我发现的最快的算法
+        //同样是找出三个点，判断直角三角形是利用两直角边所在斜率相乘是否=-1来判断的，为了避免斜率不存在的问题
+        //将(x1-x2)/(y1-y2)*(x3-x2)/(y3-y2)=-1转化为(x1-x2)*(x3-x2)-(y1-y2)*(y3-y2)=0进行判断
+        if (points == null || points.length < 4 || points[0].length != 2)
+            return 0;
+        int n = points.length;
+        double res = Double.MAX_VALUE;
+        for (int i = 0; i < n - 3; i++) {
+            for (int j = i + 1; j < n - 2; j++) {
+                for (int k = j + 1; k < n - 1; k++) {
+                    if (isRightAngle(points[j], points[i], points[k])) {
+                        res = Math.min(res, minAreaFreeRect(points, j, i, k, k + 1));
+                        continue;
+                    }
+                    if (isRightAngle(points[i], points[j], points[k])) {
+                        res = Math.min(res, minAreaFreeRect(points, i, j, k, k + 1));
+                        continue;
+                    }
+                    if (isRightAngle(points[i], points[k], points[j])) {
+                        res = Math.min(res, minAreaFreeRect(points, i, k, j, k + 1));
+                        continue;
+                    }
+                }
+            }
+        }
+        return res == Double.MAX_VALUE ? 0 : res;
+    }
+
+    private double minAreaFreeRect(int[][] points, int a, int b, int c, int start) {
+        int n = points.length;
+        double res = Double.MAX_VALUE;
+        int x = points[a][0] + points[c][0] - points[b][0];
+        int y = points[a][1] + points[c][1] - points[b][1];
+        //遍历后续的点，看看是否存在第四点
+        for (int i = start; i < n; i++) {
+            if (points[i][0] == x && points[i][1] == y) {
+                double ab = Math.sqrt((points[a][0] - points[b][0]) * (points[a][0] - points[b][0])
+                        + (points[a][1] - points[b][1]) * (points[a][1] - points[b][1]));
+                double bc = Math.sqrt((points[c][0] - points[b][0]) * (points[c][0] - points[b][0])
+                        + (points[c][1] - points[b][1]) * (points[c][1] - points[b][1]));
+                return ab * bc;
+            }
+        }
+        return res;
+    }
+
+    private boolean isRightAngle(int[] a, int[] b, int[] c) {
+        return (a[0] - b[0]) * (b[0] - c[0]) + (a[1] - b[1]) * (b[1] - c[1]) == 0;
+    }
+
+    //----------------------------------------------------------------------------------------------
+    public double minAreaFreeRect5(int[][] points) {
+        //计算两点形矩形的一边的垂直平分线，通过寻找相同垂直平分线的边作为对边组成矩形
         Arrays.sort(points, (o1, o2) -> {
             int a = o1[0] - o2[0];
             return a == 0 ? o1[1] - o2[1] : a;
