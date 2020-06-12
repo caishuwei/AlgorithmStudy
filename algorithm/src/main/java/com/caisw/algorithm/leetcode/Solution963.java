@@ -267,34 +267,92 @@ public class Solution963 {
             pointMap.put(points[i][0] * maxXY + points[i][1], i);
         }
 
-        Parallelogram result = null;
-        Parallelogram temp;
+        double result = Double.MAX_VALUE;
+        double temp;
         for (int p1 = 0; p1 < pLength - 2; p1++) {
             for (int p2 = p1 + 1; p2 < pLength - 1; p2++) {
                 for (int p3 = p2 + 1; p3 < pLength; p3++) {
                     if (p1 != p2 && p1 != p3 && p2 != p3) {
-                        temp = new Parallelogram(
-                                points[p1][0],
+                        temp = calcArea(points[p1][0],
                                 points[p1][1],
                                 points[p2][0],
                                 points[p2][1],
                                 points[p3][0],
-                                points[p3][1]
-                        );
-                        if (temp.isRect
-                                && pointMap.containsKey(temp.p4x * maxXY + temp.p4y)) {
-                            if (temp.compareArea == 1) {
-                                return 1;
-                            }
-                            if (result == null || result.compareArea > temp.compareArea) {
-                                result = temp;
-                            }
-                        }
+                                points[p3][1],
+                                pointMap);
+                        result = Math.min(temp, result);
                     }
                 }
             }
         }
-        return result == null ? 0 : result.calcArea();
+        return result == Double.MAX_VALUE ? 0 : result;
+
+//        Parallelogram result = null;
+//        Parallelogram temp;
+//        for (int p1 = 0; p1 < pLength - 2; p1++) {
+//            for (int p2 = p1 + 1; p2 < pLength - 1; p2++) {
+//                for (int p3 = p2 + 1; p3 < pLength; p3++) {
+//                    if (p1 != p2 && p1 != p3 && p2 != p3) {
+//                        temp = new Parallelogram(
+//                                points[p1][0],
+//                                points[p1][1],
+//                                points[p2][0],
+//                                points[p2][1],
+//                                points[p3][0],
+//                                points[p3][1]
+//                        );
+//                        if (temp.isRect
+//                                && pointMap.containsKey(temp.p4x * maxXY + temp.p4y)) {
+//                            if (temp.compareArea == 1) {
+//                                return 1;
+//                            }
+//                            if (result == null || result.compareArea > temp.compareArea) {
+//                                result = temp;
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return result == null ? 0 : result.calcArea();
+    }
+
+    private double calcArea(int p1x, int p1y, int p2x, int p2y, int p3x, int p3y, Map<Integer, Integer> pointMap) {
+        final int p4x, p4y;
+        final int maxSideSquare, rtSide1Square, rtSide2Square;
+
+        int side12Square = (p1x - p2x) * (p1x - p2x) + (p1y - p2y) * (p1y - p2y);
+        int side13Square = (p1x - p3x) * (p1x - p3x) + (p1y - p3y) * (p1y - p3y);
+        int side23Square = (p3x - p2x) * (p3x - p2x) + (p3y - p2y) * (p3y - p2y);
+
+        if (side12Square > side23Square && side12Square > side13Square) {
+            //p3是未知点的对角
+            maxSideSquare = side12Square;
+            rtSide1Square = side23Square;
+            rtSide2Square = side13Square;
+            p4x = p1x + (p2x - p3x);
+            p4y = p1y + (p2y - p3y);
+        } else if (side13Square > side12Square && side13Square > side23Square) {
+            //p2是未知点对角
+            maxSideSquare = side13Square;
+            rtSide1Square = side12Square;
+            rtSide2Square = side23Square;
+            p4x = p1x + (p3x - p2x);
+            p4y = p1y + (p3y - p2y);
+        } else {
+            //p1是未知点对角
+            maxSideSquare = side23Square;
+            rtSide1Square = side12Square;
+            rtSide2Square = side13Square;
+            p4x = p2x + (p3x - p1x);
+            p4y = p2y + (p3y - p1y);
+        }
+        if ((rtSide1Square + rtSide2Square) == maxSideSquare
+                && pointMap.containsKey(p4x * 40000 + p4y)) {
+            return Math.sqrt(rtSide1Square) * Math.sqrt(rtSide2Square);
+        } else {
+            return Double.MAX_VALUE;
+        }
     }
 
     /**
